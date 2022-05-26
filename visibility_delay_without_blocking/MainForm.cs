@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace visibility_delay_without_blocking
@@ -13,16 +13,27 @@ namespace visibility_delay_without_blocking
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            new Thread(makeVisibleOnDelay).Start();
+            timer.Start();
+            var count = 0;
+            timer.Tick += (sender, e1) =>
+            {
+                switch (count++)
+                {
+                    case 0:
+                        panel1.Visible = true;
+                        break;
+                    case 1:
+                        panel2.Visible = true;
+                        timer.Stop();
+                        break;
+                    default:
+                        Debug.Assert(false, "Expecting timer to stop on count 1");
+                        break;
+                }
+            };
         }
 
-        private void makeVisibleOnDelay()
-        {
-            Thread.Sleep(1000);
-            Invoke((MethodInvoker)delegate { panel1.Visible = true; });
-            Thread.Sleep(1000);
-            Invoke((MethodInvoker)delegate { panel2.Visible = true; });
-        }
+        Timer timer = new Timer() { Interval = 1000 };
     }
 }
 
