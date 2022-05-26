@@ -13,7 +13,11 @@ namespace visibility_delay_without_blocking
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            new Thread(makeVisibleOnDelay).Start();
+
+            if(!DesignMode)
+            {
+                new Thread(makeVisibleOnDelay).Start();
+            }
         }
 
         private void makeVisibleOnDelay()
